@@ -1,0 +1,58 @@
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "jetty"
+apply plugin: 'jacoco'
+apply plugin: 'eclipse'
+
+
+
+
+
+
+sourceCompatibility = 1.7
+version = '1.0'
+
+repositories {
+        mavenCentral()
+}
+
+dependencies {
+   compile "javax.servlet:servlet-api:2.5"
+   compile group: 'junit', name: 'junit', version: '4.+'
+   compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.+'
+   compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.+'
+   compile group: 'ch.qos.logback', name: 'logback-core', version: '1.0.+'
+   compile group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version:'2.+'
+   compile group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version:'2.+'
+   compile group: 'org.seleniumhq.selenium', name: 'selenium-api', version:'2.+'
+   compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version:'2.+'
+}
+sourceSets {
+    selenium
+}
+task jettyDaemon(type: org.gradle.api.plugins.jetty.JettyRun) {
+    daemon = true
+}
+
+task selenium(type: Test, dependsOn: jettyDaemon) {
+    testClassesDir = sourceSets.selenium.output.classesDir
+    classpath = sourceSets.selenium.runtimeClasspath
+}
+eclipse {
+    classpath {
+        plusConfigurations += configurations.seleniumCompile
+    }
+}
+
+task wrapper(type: Wrapper){
+gradleVersion = '1.6'
+}
+jacocoTestReport {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports after running tests."
+    additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
+}
+
+httpPort = 8081
+stopPort = 9090
+stopKey = "stopKey"
